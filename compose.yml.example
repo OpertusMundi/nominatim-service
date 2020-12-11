@@ -1,0 +1,48 @@
+version: '3.6'
+
+services:
+
+  nominatim:
+
+    image: "nominatim"
+    build:
+      context: .
+      dockerfile: Dockerfile.debian
+      args:
+        NOMINATIM_VERSION: v3.5.2
+        POSTGRES_VERSION: "${POSTGRES_VERSION}"
+
+    volumes:
+    - type: 'bind'
+      source: '/tmp/nominatim/module'
+      target: '/module'
+    - type: 'bind'
+      source: './osm_data'
+      target: '/data'
+    - type: 'bind'
+      source: "${POSTGRES_SECRET_FILE}"
+      target: '/secrets/postgres'
+      read_only: true
+
+    networks:
+    - 'opertusmundi_network'
+
+    ports:
+    - '8080:8080'
+
+    environment:
+      DATABASE_MODULE_PATH: "${DATABASE_MODULE_PATH}"
+      DATABASE_URL: "${DATABASE_URL}"
+      POSTGRES_SECRET_FILE: '/secrets/postgres'
+      POSTGRES_VERSION: "${POSTGRES_VERSION}"
+      POSTGIS_VERSION: "${POSTGIS_VERSION}"
+      NOMINATIM_MODE: "${NOMINATIM_MODE}"
+      OSMFILE: "${OSMFILE}"
+      THREADS: "${THREADS}"
+      REPLICATION_URL: "${REPLICATION_URL}"
+      REPLICATION_UPDATE_INTERVAL: "${REPLICATION_UPDATE_INTERVAL}"
+      REPLICATION_RECHECK_INTERVAL: "${REPLICATION_RECHECK_INTERVAL}"
+
+networks:
+  opertusmundi_network:
+    external: true
